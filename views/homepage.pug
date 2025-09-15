@@ -9,19 +9,19 @@ html
       h1 Custom Object Table
       a(href="/update-cobj") Add/Update this table
 
-    table(border="1" cellpadding="6" cellspacing="0")
+    table.table(border="1" cellpadding="6" cellspacing="0")
       thead
-        tr
-          th Name
-          th Color
-          th Type of Pet
+        tr.tr
+          th.th_header Name
+          th.th_header Color
+          th.th_header Type of Pet
       tbody
         each item in data
           - const p = item.properties || {}
-          tr
-            td #{p.name || ''}
-            td #{p.color || ''}
-            td #{p.type_of_pet || ''}
+          tr.tr
+            td.td #{p.name || ''}
+            td.td #{p.color || ''}
+            td.td #{p.type_of_pet || ''}
 
     br
     a(href="/") Return to the homepage
