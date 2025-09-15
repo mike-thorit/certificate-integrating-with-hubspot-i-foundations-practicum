@@ -1,13 +1,18 @@
 const express = require('express');
 const axios = require('axios');
 const app = express();
+require('dotenv').config();
+
 
 app.set('view engine', 'pug');
 app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-const OBJECT_TYPE=2-192163805
+
+
+const OBJECT_TYPE= "2-192163805"
+const HUBSPOT_TOKEN = process.env.HUBSPOT_TOKEN
 // TODO: ROUTE 1 - Create a new app.get route for the homepage to call your custom object data. Pass this data along to the front-end and create a new pug template in the views folder.
 
 // * Code for Route 1 goes here
@@ -18,11 +23,38 @@ app.get('/', async (req, res) => {
         Authorization: `Bearer ${HUBSPOT_TOKEN}`,
         'Content-Type': 'application/json'
     }
-    try {
-        const resp = await axios.get(`https://api.hubspot.com/crm/v3/objects/${OBJECT_TYPE}`, { headers });
-        const data = resp.data.results;
-        res.render('contacts', { title: 'Custom Object Data | HubSpot APIs', data });      
-    } catch (error) {
+
+  const properties = "name,color,type_of_pet"
+
+  let allResults = [];
+  let after = undefined;
+ 
+  try {
+    do {
+        const params = {
+            properties: properties,
+            limit:100,
+        };
+        if (after) params.after = after;
+
+        const resp = await axios.get(
+            `https://api.hubspot.com/crm/v3/objects/${OBJECT_TYPE}`,
+            { headers, params }
+        );
+
+        const pageResults = resp.data.results;
+        allResults = allResults.concat(pageResults);
+        after = resp.data.paging?.next?.after;
+
+
+    }while (after);  
+
+    res.render('homepage', {
+      title: 'Custom Objects',
+      data: allResults,
+    });
+
+    }catch (error) {
         console.error(error);
     }
 });
@@ -31,11 +63,43 @@ app.get('/', async (req, res) => {
 
 // TODO: ROUTE 2 - Create a new app.get route for the form to create or update new custom object data. Send this data along in the next route.
 
-// * Code for Route 2 goes here
+app.get('/update-cobj', async (req, res) => {
+  try {
+    res.render('updates', { 
+      title: 'Update Custom Object Form | Integrating With HubSpot I Practicum' 
+    });
+  } catch (error) {
+        console.error(error);
+    }
+});
+
 
 // TODO: ROUTE 3 - Create a new app.post route for the custom objects form to create or update your custom object data. Once executed, redirect the user to the homepage.
 
 // * Code for Route 3 goes here
+app.post('/update-cobj', async (req, res) => {
+    const data = {
+        properties: {
+        name: req.body.name, // replace with your actual property names
+        color: req.body.color,
+        type_of_pet: req.body.type_of_pet
+        }
+    };
+    const createObject = `https://api.hubapi.com/crm/v3/objects/${OBJECT_TYPE}`;
+    const headers = {
+        Authorization: `Bearer ${HUBSPOT_TOKEN}`,
+        'Content-Type': 'application/json'
+    };
+
+    try { 
+        await axios.post(createObject, data, { headers } );
+        res.redirect("/");
+    } catch(err) {
+        console.error(err);
+    }
+
+});
+
 
 /** 
 * * This is sample code to give you a reference for how you should structure your calls. 

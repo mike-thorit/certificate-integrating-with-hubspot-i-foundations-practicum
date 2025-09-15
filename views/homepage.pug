@@ -1,0 +1,27 @@
+doctype html
+html
+  head
+    title= title
+    meta(name="viewport" content="width=device-width, initial-scale=1")
+    link(rel="stylesheet", href="/css/style.css")
+  body
+    header
+      h1 Custom Object Table
+      a(href="/update-cobj") Add/Update this table
+
+    table(border="1" cellpadding="6" cellspacing="0")
+      thead
+        tr
+          th Name
+          th Color
+          th Type of Pet
+      tbody
+        each item in data
+          - const p = item.properties || {}
+          tr
+            td #{p.name || ''}
+            td #{p.color || ''}
+            td #{p.type_of_pet || ''}
+
+    br
+    a(href="/") Return to the homepage
